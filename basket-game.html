@@ -1,0 +1,694 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkers Sixty60 Cumulative Frequency Exercise</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .game-container {
+            width: 850px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .header-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .workspace {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 25px;
+        }
+
+        .table-section {
+            flex: 1.2;
+        }
+
+        .display-section {
+            flex: 0.8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 280px;
+            overflow: hidden;
+        }
+
+        /* Onboarding Splash Panel Layout Theme */
+        .start-panel {
+            padding: 10px 20px;
+        }
+
+            .start-panel h3 {
+                color: #333;
+                margin-top: 20px;
+                margin-bottom: 10px;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 5px;
+            }
+
+            .start-panel ul {
+                padding-left: 20px;
+                line-height: 1.6;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #7f7f7f;
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            width: 90%;
+            padding: 6px;
+            font-size: 0.95rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="number"] {
+            width: 60px;
+            padding: 6px;
+            font-size: 1rem;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .basket-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+            max-width: 320px;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* --- ANIMATION PHYSICS DEFINITIONS --- */
+        .basket-bounce {
+            animation: basketBounceEffect 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes basketBounceEffect {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            70% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .pop-item {
+            animation: fruitPopEffect 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        @keyframes fruitPopEffect {
+            0% {
+                transform: scale(0) translateY(30px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .fade-out-exit {
+            opacity: 0 !important;
+            transform: scale(0.8) translateY(-20px);
+        }
+
+        .item-card {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 6px 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            transition: transform 0.2s ease;
+        }
+
+            .item-card:hover {
+                transform: translateY(-4px) scale(1.05);
+                border-color: #b2b2b2;
+            }
+
+        .item-emoji {
+            font-size: 2.2rem;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .item-label {
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .cart-sprite {
+            font-size: 3.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        button {
+            background-color: #7f7f7f;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+            transition: background-color 0.2s ease, opacity 0.2s ease;
+        }
+
+            button:hover {
+                background-color: #5a5a5a;
+            }
+
+            button:disabled {
+                background-color: #cccccc;
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+
+        .correct-row {
+            background-color: #d4edda;
+        }
+
+        .incorrect-row {
+            background-color: #f8d7da;
+        }
+
+        .missing-row {
+            background-color: #fff3cd;
+        }
+
+        /* --- PROCEDURAL BAR CHART THEME STYLING --- */
+        .chart-box {
+            margin-top: 25px;
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .chart-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-label {
+            width: 100px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .chart-track {
+            flex: 1;
+            background: #eee;
+            border-radius: 4px;
+            margin: 0 15px;
+            height: 24px;
+            overflow: hidden;
+        }
+
+        .chart-fill {
+            height: 100%;
+            background: #007bff;
+            width: 0%;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 4px;
+        }
+
+        .chart-value {
+            width: 30px;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .status-msg-banner {
+            padding: 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .banner-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .banner-fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="header-panel">
+            <h2 id="game-title">Checkers Sixty60 Data Task</h2>
+            <span id="round-tracker" class="hidden">Round 1 / 6</span>
+        </div>
+
+        <!-- Scene 1: Introduction Splash Screen -->
+        <div id="start-view" class="start-panel">
+            <p style="font-size: 1.15rem; line-height: 1.5; color: #333;">
+                <strong>Task: Counting Items Sold</strong><br>
+                Checkers Sixty60 wants to find out which items are sold the most.<br>
+                You are given a list of items that were bought by customers.
+            </p>
+
+            <h3>Your job is to:</h3>
+            <ul>
+                <li>Look at the list of items</li>
+                <li>Count how many times each item appears</li>
+                <li>Use tally marks to help you count</li>
+                <li>Write the total number in the frequency column</li>
+            </ul>
+
+            <p style="font-size: 1.1rem; margin-top: 25px; margin-bottom: 25px;">
+                <strong>Goal:</strong> Complete the table to show how many times each item was sold.
+            </p>
+
+            <button id="start-btn" style="padding: 15px 40px; font-size: 1.2rem;">Start Exercise</button>
+        </div>
+
+        <!-- Scene 2: Active Gameplay View -->
+        <div id="gameplay-view" class="hidden">
+            <p style="margin-top: 0; color: #555;">Update your tally table dynamically as labeled items appear in each new basket layout.</p>
+            <div class="workspace">
+                <div class="table-section">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Frequency</th>
+                            </tr>
+                        </thead>
+                        <tbody id="interactive-rows">
+                            <tr><td><input type="text" class="row-category"></td><td><input type="number" class="row-freq" min="0"></td></tr>
+                            <tr><td><input type="text" class="row-category"></td><td><input type="number" class="row-freq" min="0"></td></tr>
+                            <tr><td><input type="text" class="row-category"></td><td><input type="number" class="row-freq" min="0"></td></tr>
+                            <tr><td><input type="text" class="row-category"></td><td><input type="number" class="row-freq" min="0"></td></tr>
+                            <tr><td><input type="text" class="row-category"></td><td><input type="number" class="row-freq" min="0"></td></tr>
+                            <tr><td><input type="text" class="row-category"></td><td><input type="number" class="row-freq" min="0"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="display-section">
+                    <div class="basket-items" id="basket-content"></div>
+                    <div class="cart-sprite" id="cart-graphics">🛒</div>
+                </div>
+            </div>
+
+            <button id="action-btn">Next Basket</button>
+        </div>
+
+        <!-- Scene 3: Final Results Summary View -->
+        <div id="results-view" class="hidden">
+            <div id="status-message-box"></div>
+            <div id="summary-container"></div>
+            <div id="chart-insertion-point"></div>
+            <button id="restart-btn" style="margin-top: 20px;">Try Again</button>
+        </div>
+    </div>
+
+    <script>
+        const visualAssets = {
+        "apple": "🍎", "banana": "🍌", "grapes": "🍇",
+        "pear": "🍐", "orange": "🍊", "cherry": "🍒"
+        };
+
+        const aliasesDictionary = {
+        "apple": "apple", "apples": "apple",
+        "banana": "banana", "bananas": "banana",
+        "grapes": "grapes", "grape": "grapes",
+        "pear": "pear", "pears": "pear",
+        "orange": "orange", "oranges": "orange",
+        "cherry": "cherry", "cherries": "cherry"
+        };
+
+        const roundPayloads = [
+        { banana: 3, apple: 4 },
+        { banana: 2, grapes: 5 },
+        { apple: 3, pear: 3 },
+        { orange: 4, cherry: 2 },
+        { grapes: 3, orange: 3, apple: 1 },
+        { pear: 4, cherry: 4 }
+        ];
+
+        const backendMetrics = { totals: {} };
+        roundPayloads.forEach(round => {
+        for (const [item, count] of Object.entries(round)) {
+        if (!backendMetrics.totals[item]) backendMetrics.totals[item] = 0;
+        backendMetrics.totals[item] += count;
+        }
+        });
+
+        let currentRoundIndex = 0;
+        let audioCtx = null;
+
+        const startView = document.getElementById('start-view');
+        const startBtn = document.getElementById('start-btn');
+        const gameplayView = document.getElementById('gameplay-view');
+        const resultsView = document.getElementById('results-view');
+        const basketContent = document.getElementById('basket-content');
+        const cartGraphics = document.getElementById('cart-graphics');
+        const roundTracker = document.getElementById('round-tracker');
+        const actionBtn = document.getElementById('action-btn');
+        const summaryContainer = document.getElementById('summary-container');
+        const statusMessageBox = document.getElementById('status-message-box');
+        const chartInsertionPoint = document.getElementById('chart-insertion-point');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function getAudioContext() {
+        if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+        }
+        return audioCtx;
+        }
+
+        function playRegisterChime() {
+        try {
+        const ctx = getAudioContext();
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(1200, ctx.currentTime);
+        gain1.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1500, ctx.currentTime + 0.05);
+        gain2.gain.setValueAtTime(0.1, ctx.currentTime + 0.05);
+        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+
+        osc1.connect(gain1); gain1.connect(ctx.destination);
+        osc2.connect(gain2); gain2.connect(ctx.destination);
+
+        osc1.start(); osc1.stop(ctx.currentTime + 0.4);
+        osc2.start(ctx.currentTime + 0.05); osc2.stop(ctx.currentTime + 0.45);
+        } catch (e) { console.warn("Audio error:", e); }
+        }
+
+        function playVictoryFanfare() {
+        try {
+        const ctx = getAudioContext();
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, index) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + (index * 0.1));
+        gain.gain.setValueAtTime(0.12, ctx.currentTime + (index * 0.1));
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (index * 0.1) + 0.5);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + (index * 0.1)); osc.stop(ctx.currentTime + (index * 0.1) + 0.5);
+        });
+        } catch (e) { console.warn(e); }
+        }
+
+        function playFailureBuzzer() {
+        try {
+        const ctx = getAudioContext();
+        const now = ctx.currentTime;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc1.type = 'square'; osc1.frequency.setValueAtTime(130, now);
+        osc2.type = 'square'; osc2.frequency.setValueAtTime(133, now);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0.15, now + 0.4);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        osc1.connect(gain); osc2.connect(gain); gain.connect(ctx.destination);
+        osc1.start(now); osc2.start(now); osc1.stop(now + 0.5); osc2.stop(now + 0.5);
+        } catch (e) { console.warn(e); }
+        }
+
+        // Onboarding Scene Switch Event Trigger Callback
+        startBtn.addEventListener('click', () => {
+        startView.classList.add('hidden');
+        gameplayView.classList.remove('hidden');
+        roundTracker.classList.remove('hidden');
+
+        // Initialize Audio Pipeline on user action to satisfy browser security rules
+        getAudioContext();
+        loadRound(currentRoundIndex);
+        });
+
+        function loadRound(index) {
+        basketContent.classList.remove('fade-out-exit');
+        basketContent.innerHTML = "";
+        roundTracker.textContent = `Round ${index + 1} / 6`;
+
+        cartGraphics.style.transform = "scale(0.7) rotate(-10deg)";
+        setTimeout(() => { cartGraphics.style.transform = "scale(1) rotate(0deg)"; }, 200);
+
+        const currentRoundData = roundPayloads[index];
+        let displayPool = [];
+
+        for (const [itemName, count] of Object.entries(currentRoundData)) {
+        const emoji = visualAssets[itemName];
+        for (let i = 0; i < count; i++) {
+        displayPool.push({ name: itemName, icon: emoji });
+        }
+        }
+
+        displayPool.sort(() => Math.random() - 0.5);
+
+        displayPool.forEach((itemObj, arrayIndex) => {
+        const card = document.createElement('div');
+        card.className = "item-card pop-item";
+        card.style.animationDelay = `${arrayIndex * 0.04}s`;
+        card.innerHTML = `
+        <span class="item-emoji">${itemObj.icon}</span>
+        <span class="item-label">${itemObj.name}</span>
+        `;
+        basketContent.appendChild(card);
+        });
+
+        if (index === roundPayloads.length - 1) {
+        actionBtn.textContent = "Submit Experience";
+        }
+        actionBtn.disabled = false;
+        }
+
+        actionBtn.addEventListener('click', () => {
+        actionBtn.disabled = true;
+        playRegisterChime();
+        basketContent.classList.add('fade-out-exit');
+
+        setTimeout(() => {
+        if (currentRoundIndex < roundPayloads.length - 1) {
+        currentRoundIndex++;
+        loadRound(currentRoundIndex);
+        } else {
+        processFinalAssessment();
+        }
+        }, 800);
+        });
+
+        function processFinalAssessment() {
+        gameplayView.classList.add('hidden');
+        resultsView.classList.remove('hidden');
+        roundTracker.textContent = "Complete";
+
+        const categoryInputs = document.querySelectorAll('.row-category');
+        const freqInputs = document.querySelectorAll('.row-freq');
+
+        let userTableData = {};
+        for (let i = 0; i < categoryInputs.length; i++) {
+        let rawText = categoryInputs[i].value.trim().toLowerCase();
+        let freqValue = freqInputs[i].value;
+
+        if (rawText !== "") {
+        let normalizedKey = aliasesDictionary[rawText] || rawText;
+        userTableData[normalizedKey] = freqValue !== "" ? parseInt(freqValue, 10) : 0;
+        }
+        }
+
+        let allAnswersCorrect = true;
+        let tableRowsHtml = "";
+
+        for (const [expectedItem, correctTotal] of Object.entries(backendMetrics.totals)) {
+        const userTotal = userTableData[expectedItem];
+        let rowClass = "";
+        let diagnosticText = "";
+
+        if (userTotal === undefined) {
+        rowClass = "missing-row";
+        diagnosticText = "❌ This category was not found in your table.";
+        allAnswersCorrect = false;
+        } else if (userTotal === correctTotal) {
+        rowClass = "correct-row";
+        diagnosticText = "✅ Correct match!";
+        } else {
+        rowClass = "incorrect-row";
+        diagnosticText = `❌ Discrepancy detected (Expected total: ${correctTotal}).`;
+        allAnswersCorrect = false;
+        }
+
+        tableRowsHtml += `
+        <tr class="${rowClass}">
+        <td><strong style="text-transform: capitalize;">${expectedItem}</strong></td>
+        <td>${correctTotal}</td>
+        <td>${userTotal !== undefined ? userTotal : "Missing Entry"}</td>
+        <td>${diagnosticText}</td>
+        </tr>`;
+        }
+
+        for (const [userItem, userTotal] of Object.entries(userTableData)) {
+        if (backendMetrics.totals[userItem] === undefined) {
+        allAnswersCorrect = false;
+        tableRowsHtml += `
+        <tr class="incorrect-row">
+        <td><strong style="text-transform: capitalize;">${userItem}</strong></td>
+        <td>0</td>
+        <td>${userTotal}</td>
+        <td>❌ Unrecognized category name ("${userItem}").</td>
+        </tr>`;
+        }
+        }
+
+        // Final Evaluation Flow Routing
+        if (allAnswersCorrect) {
+        playVictoryFanfare();
+        statusMessageBox.innerHTML = `
+        <div class="status-msg-banner banner-success">
+        🎉 Congratulations: Your statistics are accurate: here is a bar chart showing the statistics you gathered.
+        </div>`;
+
+        renderAnimatedBarChart();
+        restartBtn.textContent = "Start New Simulation";
+        } else {
+        playFailureBuzzer();
+        statusMessageBox.innerHTML = `
+        <div class="status-msg-banner banner-fail">
+        ⚠️ Statistics are incorrect. Review and resubmission is required.
+        </div>`;
+
+        restartBtn.textContent = "Try Again (Restart Exercise)";
+        chartInsertionPoint.innerHTML = "";
+        }
+
+        // Both evaluation branches execute a clean app reload sequence to start fresh
+        restartBtn.onclick = () => window.location.reload();
+
+        const card = document.createElement('div');
+        card.className = "summary-card basket-bounce";
+        card.innerHTML = `
+        <h4>Data Comparison Review Matrix</h4>
+        <table>
+        <tr>
+        <th>Item Category</th>
+        <th>Expected Total</th>
+        <th>Your Cumulative Value</th>
+        <th>Status Evaluation</th>
+        </tr>
+        ${tableRowsHtml}
+        </table>`;
+
+        summaryContainer.innerHTML = "";
+        summaryContainer.appendChild(card);
+        }
+
+        function renderAnimatedBarChart() {
+        chartInsertionPoint.innerHTML = "";
+        const chartBox = document.createElement('div');
+        chartBox.className = "chart-box basket-bounce";
+        chartBox.innerHTML = `<h3>Visual Frequency Distribution</h3>`;
+
+        const maxCount = Math.max(...Object.values(backendMetrics.totals));
+
+        for (const [item, total] of Object.entries(backendMetrics.totals)) {
+        const percentageWidth = (total / maxCount) * 100;
+
+        const row = document.createElement('div');
+        row.className = "chart-row";
+        row.innerHTML = `
+        <div class="chart-label">${visualAssets[item]} ${item}</div>
+        <div class="chart-track">
+        <div class="chart-fill" id="bar-${item}"></div>
+        </div>
+        <div class="chart-value">${total}</div>
+        `;
+        chartBox.appendChild(row);
+
+        setTimeout(() => {
+        const fillBar = document.getElementById(`bar-${item}`);
+        if (fillBar) fillBar.style.width = `${percentageWidth}%`;
+        }, 150);
+        }
+
+        chartInsertionPoint.appendChild(chartBox);
+        }
+    </script>
+</body>
+</html>
